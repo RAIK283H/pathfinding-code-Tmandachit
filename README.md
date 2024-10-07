@@ -2,7 +2,7 @@
 
 The player cannot return to the start.
 The player must visit the target before the exit.
-The player cannot revisit nodes that have already been visited in a single path.
+The player cannot revisit nodes that have already been visited.
 
 Random Path Generation: 
     Precondition: 
