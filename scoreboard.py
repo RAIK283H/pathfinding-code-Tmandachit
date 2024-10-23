@@ -59,12 +59,17 @@ class Scoreboard:
                                         font_name='Arial',
                                         font_size=self.font_size, batch=batch, group=group, color=player[2][colors.TEXT_INDEX])
             self.player_visited_nodes_display.append((visited_nodes_label, player))
+            self.winner_label = pyglet.text.Label('Winner: N/A', x=0, y=0,
+                                      font_name='Arial', font_size=self.font_size, batch=batch, group=group)
 
-            
+
+        
 
     def update_elements_locations(self):
         self.distance_to_exit_label.x = config_data.window_width - self.stat_width
         self.distance_to_exit_label.y = config_data.window_height - self.stat_height;
+        self.winner_label.x = config_data.window_width - self.stat_width
+        self.winner_label.y = config_data.window_height - self.stat_height * 2
         for index, (display_element, player) in enumerate(self.player_name_display):
             display_element.x = config_data.window_width - self.stat_width
             display_element.y = config_data.window_height - self.base_height_offset - self.stat_height * 2 - self.stat_height * (index * self.number_of_stats)
@@ -80,6 +85,7 @@ class Scoreboard:
         for index, (display_element, player) in enumerate(self.player_visited_nodes_display):
             display_element.x = config_data.window_width - self.stat_width
             display_element.y = config_data.window_height - self.base_height_offset - self.stat_height * 6 - self.stat_height * (index * self.number_of_stats)
+        
 
     def update_paths(self):
         for index in range(len(config_data.player_data)):
@@ -114,6 +120,21 @@ class Scoreboard:
                 if player_object.player_config_data == player_configuration_info:
                     visited_nodes_count = len(set(global_game_data.graph_paths[index])) 
                     display_element.text = f"Nodes Visited: {visited_nodes_count}"
+                    
+    def update_winner(self):
+        min_distance = float('inf')
+        winner_index = -1
+
+        for index, player_configuration_info in enumerate(config_data.player_data):
+            for player_object in global_game_data.player_objects:
+                if player_object.player_config_data == player_configuration_info:
+                    if player_object.distance_traveled < min_distance:
+                        min_distance = player_object.distance_traveled
+                        winner_index = index
+
+        if winner_index != -1:
+            self.winner_label.text = f'Winner: Player {winner_index + 1}'
+
 
     def update_scoreboard(self):
         self.update_elements_locations()
@@ -121,3 +142,5 @@ class Scoreboard:
         self.update_distance_to_exit()
         self.update_distance_traveled()
         self.update_visited_nodes()
+        self.update_winner()
+
