@@ -1,5 +1,6 @@
 import graph_data
 import global_game_data
+import heapq
 from numpy import random
 from collections import deque
 
@@ -121,4 +122,50 @@ def get_bfs_path():
 
 
 def get_dijkstra_path():
-    return [1,2]
+    graph = graph_data.graph_data[global_game_data.current_graph_index]
+    start_node = 0
+    target_node = global_game_data.target_node[global_game_data.current_graph_index]
+    exit_node = len(graph) - 1
+
+    def dijkstra(start, target):
+        # Priority queue with (cost, node, path)
+        priority_queue = []
+        heapq.heappush(priority_queue, (0, start, [start]))
+
+        # Distance dictionary to store the shortest distance to each node
+        shortest_distances = {start: 0}
+
+        while priority_queue:
+            current_cost, current_node, current_path = heapq.heappop(priority_queue)
+
+            # Stop if we reach the target
+            if current_node == target:
+                return current_path
+
+            # Check neighbors (assume weights are all 1 for simplicity or adapt as needed)
+            for neighbor in graph[current_node][1]:
+                new_cost = current_cost + 1  # Replace 1 with the actual weight if weights are stored elsewhere
+                if neighbor not in shortest_distances or new_cost < shortest_distances[neighbor]:
+                    shortest_distances[neighbor] = new_cost
+                    heapq.heappush(priority_queue, (new_cost, neighbor, current_path + [neighbor]))
+
+        return None
+
+
+    # Find the path from start to target
+    start_to_target_path = dijkstra(start_node, target_node)
+    assert start_to_target_path is not None, "No path found from start to target."
+
+    # Find the path from target to exit
+    target_to_exit_path = dijkstra(target_node, exit_node)
+    assert target_to_exit_path is not None, "No path found from target to exit."
+
+    # Combine the paths (avoiding duplicate target node)
+    full_path = start_to_target_path[:-1] + target_to_exit_path
+
+    # Postconditions
+    assert full_path[0] == start_node, "Path must start at the start node."
+    assert full_path[-1] == exit_node, "Path must end at the exit node."
+    assert target_node in full_path, "Path must include the target node."
+
+    return full_path
